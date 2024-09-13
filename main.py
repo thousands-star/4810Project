@@ -1,5 +1,5 @@
 from dustbin import Dustbin
-from telegram import TelegramBot
+from server import TelegramBot
 import asyncio
 from config_reader import ConfigReader
 from dustbinanalysertop import DustbinAnalyser

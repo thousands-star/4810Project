@@ -1,8 +1,8 @@
 [TELEGRAM]
-token = "7368549794:AAG5QqG5zM-PwhHze7F09wsltwV8z34Lv3A"
-api_id = "26493375"
-api_hash = "f0615ce015c8e92091a5513a58d8b712"
-interval = 5
+token = 7313428073:AAFBJn9Uk5u6u7wIoijA4UDCsH8V7ia26Fo
+api_id = 28215074
+api_hash = e8588c6943546109a766c35f02e7cea5
+interval = 1
 alert_frequency = 15
 
 [THINGSPEAK]

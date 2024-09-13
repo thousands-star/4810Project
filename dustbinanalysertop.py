@@ -3,24 +3,34 @@ import time
 import matplotlib.pyplot as plt
 from dustbin import Dustbin
 import matplotlib.patches as mpatches
+from config_reader import ConfigReader
 
 class DustbinAnalyser:
     """
     A Dustbin Analsyser that interprets the raw data collected from the ultrasonic sensor, performs analysis and
     generates useful message (e.g. a graph of the fullness, message to the telegram bot).
     """
-    def __init__(self, write_api_key: str, dustbin_list: list[Dustbin]):
+    def __init__(self, configReader:ConfigReader):
         """
         Initializes a DustbinAnalyser object.
 
         Args:
-            write_api_key (str): The API key used to write data.
             dustbin_list (list[Dustbin]): A list of Dustbin objects.
 
         Returns:
             None
         """
-        self.write_api_key = write_api_key              # The API key used to write analysed data to ThingSpeak
+        self.write_api_key = configReader.get_param("THINGSPEAK", "write_api_key")  # The API key used to write analysed data to ThingSpeak
+        read_api_keys, write_api_key, channel_ids = configReader.get_thingspeak_info()
+        dustbins_info = configReader.get_dustbin_info()
+        dustbin_list = []
+        # Prepare the dustbin objects
+        for i, dustbin_info in enumerate(dustbins_info):
+            url = f"https://api.thingspeak.com/channels/{channel_ids[i]}/fields/1/last.json?api_key={read_api_keys[i]}&status=true"
+            depth = dustbin_info['depth']
+            tag = dustbin_info['tag']
+            dustbin_list.append(Dustbin(depth, tag, url))
+            
         self.raw_data_dict: dict[int, list] = {}        # A dictionary to store the raw data from all the dustbins
         self.dustbin_num = len(dustbin_list)
         for i in range(self.dustbin_num):

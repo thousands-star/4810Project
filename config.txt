@@ -1,9 +1,27 @@
 [TELEGRAM]
-TOKEN = "7368549794:AAG5QqG5zM-PwhHze7F09wsltwV8z34Lv3A"
-API_ID = "26493375"
-API_HASH = "f0615ce015c8e92091a5513a58d8b712"
-INTERVAL = 5
-ALERT_FREQUENCY = 15
+token = "7368549794:AAG5QqG5zM-PwhHze7F09wsltwV8z34Lv3A"
+api_id = "26493375"
+api_hash = "f0615ce015c8e92091a5513a58d8b712"
+interval = 5
+alert_frequency = 15
 
 [THINGSPEAK]
-WRITE_API_KEY = "NVF9Q3QGYMYRLCKJ"
+read_api_keys = FR97G4Z3JFM9LK4Z,DT76O8OQ5F0ZWLXW,CJGXBTKXSZDJHPU2,XG4JT6TJMMCCNK5G
+write_api_key = NVF9Q3QGYMYRLCKJ
+channel_ids = 2623642,2615870,2623647,2623708
+
+[DUSTBIN_1]
+depth = 45.6
+tag = "Dustbin 1"
+
+[DUSTBIN_2]
+depth = 50.3
+tag = "Dustbin 2"
+
+[DUSTBIN_3]
+depth = 48.9
+tag = "Dustbin 3"
+
+[DUSTBIN_4]
+depth = 55.0
+tag = "Dustbin 4"

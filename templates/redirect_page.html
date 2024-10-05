@@ -1,0 +1,26 @@
+<!-- templates/redirect_page.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Success</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='redirect_style.css') }}">
+
+    <!-- Redirect after 2 seconds -->
+    <script>
+        setTimeout(function() {
+            window.location.href = "{{ url_for('main') }}";
+        }, 2000);
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="message">
+            <h2>{{ get_flashed_messages()[0] }}</h2>
+            <p>You will be redirected to the main page very soon...</p>
+        </div>
+        <div class="loader"></div> <!-- Spinning spiral loader -->
+    </div>
+</body>
+</html>

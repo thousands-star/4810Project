@@ -1,16 +1,15 @@
-<!-- templates/login.html -->
+<!-- templates/signup.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
-    <!-- Link to the CSS file -->
+    <title>Sign Up</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <div class="container">
-        <h2>Login Page</h2>
+        <h2>Sign Up</h2>
 
         <!-- Display flash messages -->
         {% with messages = get_flashed_messages() %}
@@ -23,14 +22,18 @@
           {% endif %}
         {% endwith %}
 
-        <form action="/login" method="POST">
+        <!-- Sign-up form with telephone number -->
+        <form action="/signup" method="POST">
             <label for="username">Username:</label>
             <input type="text" id="username" name="username" required><br>
 
             <label for="password">Password:</label>
             <input type="password" id="password" name="password" required><br>
 
-            <input type="submit" value="Login">
+            <label for="telephone">Telephone Number:</label>
+            <input type="text" id="telephone" name="telephone" required><br>
+
+            <input type="submit" value="Sign Up">
         </form>
     </div>
 </body>

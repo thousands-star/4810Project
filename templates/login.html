@@ -1,0 +1,62 @@
+<!-- templates/login.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h2>Login / Sign Up Page</h2>
+
+        <!-- Display flash messages -->
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <ul>
+              {% for message in messages %}
+                <li>{{ message }}</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
+
+        <!-- Sign In / Sign Up Form -->
+        <form id="loginForm" action="/login" method="POST">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required><br>
+
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required><br>
+
+            <!-- Sign In / Sign Up Options -->
+            <input type="submit" id="loginButton" value="Sign In">
+            <input type="button" id="signupButton" value="Sign Up">
+        </form>
+    </div>
+
+    <!-- Add JavaScript -->
+    <script>
+        const form = document.getElementById('loginForm');
+        const loginButton = document.getElementById('loginButton');
+        const signupButton = document.getElementById('signupButton');
+
+        // Handle form submission (Sign In)
+        form.addEventListener('submit', function(event) {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (username === '' || password === '') {
+                alert('Please fill out both fields!');
+                event.preventDefault(); // Prevent submission if validation fails
+            }
+        });
+
+        // Handle Sign Up button click (Redirect to Sign Up page)
+        signupButton.addEventListener('click', function() {
+            window.location.href = '/signup';  // Redirect to Sign Up route
+        });
+    </script>
+</body>
+</html>

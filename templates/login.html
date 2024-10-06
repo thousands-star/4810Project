@@ -1,4 +1,3 @@
-<!-- templates/login.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -22,7 +21,7 @@
           {% endif %}
         {% endwith %}
 
-        <!-- Sign In / Sign Up Form -->
+        <!-- Sign In Form -->
         <form id="loginForm" action="/login" method="POST">
             <label for="username">Username:</label>
             <input type="text" id="username" name="username" required><br>
@@ -30,33 +29,17 @@
             <label for="password">Password:</label>
             <input type="password" id="password" name="password" required><br>
 
-            <!-- Sign In / Sign Up Options -->
-            <input type="submit" id="loginButton" value="Sign In">
-            <input type="submit" id="signupButton" value="Sign Up">
+            <!-- Sign In Button -->
+            <input type="submit" id="loginButton" value="Log In"> <!-- This will submit the form -->
         </form>
+
+        <!-- Sign Up Text -->
+        <p>If you don't have an account, please <a href="/signup" class="signup-link">Sign Up</a> here.</p>
     </div>
 
     <!-- Add JavaScript -->
     <script>
-        const form = document.getElementById('loginForm');
-        const loginButton = document.getElementById('loginButton');
-        const signupButton = document.getElementById('signupButton');
-
-        // Handle form submission (Sign In)
-        form.addEventListener('submit', function(event) {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-
-            if (username === '' || password === '') {
-                alert('Please fill out both fields!');
-                event.preventDefault(); // Prevent submission if validation fails
-            }
-        });
-
-        // Handle Sign Up button click (Redirect to Sign Up page)
-        signupButton.addEventListener('click', function() {
-            window.location.href = '/signup';  // Redirect to Sign Up route
-        });
+        // Add any JavaScript if needed in the future
     </script>
 </body>
 </html>

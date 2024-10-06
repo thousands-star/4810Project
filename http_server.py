@@ -1,20 +1,22 @@
 import json
 import requests
 from flask import Flask, render_template, request, redirect, url_for, flash, session
-
+import random
 import time
 import csv
 import io
 import matplotlib.pyplot as plt
 from flask import send_file
+from server import TelegramBot
+from config_reader import ConfigReader
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
 # Replace this with the IP address of your Raspberry Pi running the Flask database server
 raspi_url = "http://192.168.133.95:5000"
-
-
+configReader = ConfigReader()
+telegram_token = configReader.get_param('TELEGRAM', 'token')
 
 def save_user(data):
     try:
@@ -40,6 +42,22 @@ def add_chat_id(data):
         print(f"Error connecting to the database: {e}")
         return None
 
+def get_chat_id(username, password):
+    try:
+        # Send both username and password to the database server for verification
+        data = {"username": username, "password": password}
+        response = requests.post(f"{raspi_url}/get_chat_id", json=data)
+
+        if response.status_code == 200:
+            chat_id = response.json().get('chat_id')
+            print("Get chat_id successfully")
+            return chat_id
+        else:
+            print(f"Error: {response.json().get('error')}")
+            return None
+    except Exception as e:
+        print(f"Error connecting to the database: {e}")
+        return None
 
 @app.route('/')
 def home():
@@ -61,18 +79,52 @@ def login():
             "password": password
         }
 
-        # Check if the username exists and the password matches by sending a request to the database server
+        # Authenticate the user (check username and password)
         response = authenticate_user(data)
 
         if response and response.status_code == 200:
-            session['username'] = username  # Store username in session
-            flash('Login successfully!', 'success')
-            return redirect(url_for('redirect_page'))  # Redirect to the intermediate page
+            # Try to get the chat_id from the Raspberry Pi database
+            chat_id = get_chat_id(username, password)
+
+            print(f"Chat ID retrieved: {chat_id}")
+            
+            if chat_id:
+                # Generate OTP and send via Telegram
+                otp = generate_otp()
+                session['otp'] = otp  # Store OTP in the session for verification
+
+                if send_otp_telegram(chat_id, otp):
+                    flash('OTP sent to your Telegram!', 'success')
+                    session['username'] = username  # Store username in session for further use
+                    return redirect(url_for('verify_otp_page'))
+                else:
+                    flash('Failed to send OTP. Please try again.', 'error')
+                    return redirect(url_for('login'))
+            else:
+                flash('No Telegram chat ID found for user.', 'error')
+                return redirect(url_for('login'))
         else:
             flash('Invalid username or password. Please try again.', 'error')
-            return redirect(url_for('login'))
 
     return render_template('login.html')
+
+
+@app.route('/verify_otp', methods=['GET', 'POST'])
+def verify_otp_page():
+    if request.method == 'POST':
+        input_otp = request.form['otp']
+
+        # Verify the OTP entered by the user
+        if verify_otp(input_otp):
+            session.pop('otp', None)  # OTP is valid, remove it from session
+            flash('Login successful!', 'success')
+            return redirect(url_for('redirect_page'))  # Redirect to home page
+        else:
+            flash('Invalid OTP. Please try again.', 'error')
+            return redirect(url_for('verify_otp_page'))
+
+    return render_template('verify_otp.html')
+
 
 
 @app.route('/redirect_page')
@@ -188,6 +240,40 @@ def logout():
     flash('You have been logged out.')
     return redirect(url_for('login'))
 
+# Function to generate OTP
+def generate_otp():
+    return str(random.randint(100000, 999999))
 
+# Function to send OTP via Telegram
+def send_otp_telegram(chat_id, otp):
+    bot_token = telegram_token  # Replace with your Telegram bot token
+    message = f"Your OTP is: {otp}"
+    
+    try:
+        url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+        data = {
+            'chat_id': chat_id,
+            'text': message
+        }
+        response = requests.post(url, data=data)
+        
+        # Log the response details
+        print(f"Response Status Code: {response.status_code}")
+        print(f"Response Text: {response.text}")
+        
+        if response.status_code == 200:
+            return True
+        else:
+            print(f"Failed to send OTP: {response.status_code} {response.text}")
+            return False
+    except Exception as e:
+        print(f"Error sending OTP: {e}")
+        return False
+
+
+# Function to verify OTP (you can store the generated OTP in the session)
+def verify_otp(input_otp):
+    return input_otp == session.get('otp')
+    
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

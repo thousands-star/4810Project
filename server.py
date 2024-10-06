@@ -5,7 +5,6 @@ from telethon import TelegramClient, events, Button
 from aiogram.types import FSInputFile # use for message handler
 from storageTank.dustbinanalysertop import *
 from config_reader import ConfigReader
-from security.user_authenticator import UserAuthenticator
 import time
 
 class TelegramBot:
@@ -22,7 +21,10 @@ class TelegramBot:
         self.count = 0
         self.chat_ids = set()  # Store chat_ids of users who interact with the bot
         self.logged_in_users = set()
-        self.pending_login = {}  # Track login/signup state for each user
+        self.pending_login = {}  # Track login state for each user
+        
+        self.flask_server_url = "192.168.133.95"
+
 
         # Set up telegram bot and dustbin analyzer
         print(token)
@@ -36,6 +38,38 @@ class TelegramBot:
         # Register event handlers
         self.register_handlers()
 
+    def authenticate_user(self, username, password):
+        """
+        Sends login credentials to the Flask server for authentication.
+        """
+        data = {
+            "username": username,
+            "password": password
+        }
+        try:
+            response = requests.post(f"{self.flask_server_url}/login", json=data)
+            return response
+        except Exception as e:
+            print(f"Error authenticating user: {e}")
+            return None
+
+    def add_chat_id(self, username, chat_id):
+        """
+        Sends the user's chat_id to the Flask server after successful login.
+        """
+        data = {
+            "username": username,
+            "chat_id": chat_id
+        }
+        try:
+            response = requests.post(f"{self.flask_server_url}/add_chat_id", json=data)
+            if response.status_code == 200:
+                print(f"Chat ID for {username} successfully added to the database.")
+            else:
+                print(f"Failed to add chat ID for {username}.")
+        except Exception as e:
+            print(f"Error adding chat ID: {e}")
+
 
     """
     Handlers
@@ -48,15 +82,11 @@ class TelegramBot:
         self.client.on(events.NewMessage(pattern='Send me a data analysis'))(self.sendDataAnalysis)
         self.client.on(events.NewMessage(pattern='Send me a graph of current fullness!'))(self.sendGraph)
         self.client.on(events.NewMessage(pattern='Login'))(self.login_handler)
-        self.client.on(events.NewMessage(pattern='Sign Up'))(self.signup_handler)
         self.client.on(events.NewMessage(incoming=True))(self.handle_message)  # Catch all other messages
         self.client.on(events.NewMessage(pattern='/help'))(self.help_handler)
         self.client.on(events.NewMessage(pattern='/logout'))(self.logout_handler)
         self.client.on(events.NewMessage(pattern='/quit'))(self.quit_handler)
-    """
-    Login/Signup Handlers
 
-    """
     async def quit_handler(self, event):
         """
         Gracefully shut down the bot on the /quit command.
@@ -105,37 +135,38 @@ class TelegramBot:
         time.sleep(1)
         await event.respond("Please enter your username:")
 
-    async def signup_handler(self, event):
-        user_id = event.sender_id
-        self.pending_login[user_id] = {'step': 1, 'action': 'signup'}
-        await event.respond("Please enter your desired username:")
-
     async def handle_message(self, event):
         user_id = event.sender_id
         text = event.message.text.strip()
         print(text)
 
-        # Check if the user is in the middle of login or signup process
+        # Check if the user is in the middle of the login process
         if user_id in self.pending_login:
             state = self.pending_login[user_id]
             step = state['step']
 
             # Step 1: Get Username
             if step == 1:
-                if(text == 'Login' or text == 'Sign Up'):
+                if text == 'Login' or text == 'Sign Up':
                     return
                 state['username'] = text  # Store the entered username
                 state['step'] = 2  # Move to the next step (asking for password)
-                await event.respond("Please enter your password:")  # Ask for password
+                await event.respond("Please enter your password:")
 
-            # Step 2: Get Password and handle login/signup
+            # Step 2: Get Password and handle login
             elif step == 2:
                 password = text
                 username = state['username']
 
                 if state['action'] == 'login':
-                    if UserAuthenticator.check(username, password):
+                    # Send a request to the Raspberry Pi Flask server to check the login credentials
+                    response = self.authenticate_user(username, password)
+                    if response and response.status_code == 200:
                         self.logged_in_users.add(user_id)
+
+                        # Register the user's chat_id on the server
+                        self.add_chat_id(username, user_id)
+
                         del self.pending_login[user_id]  # Clear pending login
                         await event.respond(f"Welcome, {username}! You are now logged in.")
                         await self.main_menu(event)
@@ -143,21 +174,8 @@ class TelegramBot:
                         await event.respond("Invalid username or password. Please try again.")
                         del self.pending_login[user_id]  # Clear pending login after failed attempt
 
-                elif state['action'] == 'signup':
-                    if not UserAuthenticator.check(username, password):
-                        success, reply = UserAuthenticator.add_user(username, password)  # Add new user to system
-                        print(success, reply)
-                        self.logged_in_users.add(user_id)
-                        del self.pending_login[user_id]  # Clear pending signup
-                        await event.respond(f"Welcome, {username}! Your account has been created and you are now logged in.")
-                        await self.main_menu(event)
-                    else:
-                        await event.respond("This username is already taken. Please choose a different one.")
-                        del self.pending_login[user_id]  # Clear pending signup
-
         else:
-            # If the user is not in the middle of login/signup process, show this message
-            await event.respond("Using /help to get more info.")
+            await event.respond("Use /help to get more info.")
 
     # This function responsible for sending the analyzed data to the telegram bot 
     async def sendDataAnalysis(self, event):
@@ -197,11 +215,11 @@ class TelegramBot:
             await event.respond(
                 "Welcome to the bot! Please select an option:",
                 buttons=[
-                [Button.text('Login')],
-                [Button.text('Sign Up')],
-            ]
+                    [Button.text('Login')]
+                ]
             )
             return
+
 
         await event.respond(
             'Welcome to the bot! Choose an option:',

@@ -22,7 +22,7 @@
           {% endif %}
         {% endwith %}
 
-        <!-- Sign-up form with telephone number -->
+        <!-- Sign-up form -->
         <form action="/signup" method="POST">
             <label for="username">Username:</label>
             <input type="text" id="username" name="username" required><br>
@@ -31,7 +31,14 @@
             <input type="password" id="password" name="password" required><br>
 
             <label for="telephone">Telephone Number:</label>
-            <input type="text" id="telephone" name="telephone" required><br>
+            <input type="tel" id="telephone" name="telephone" required><br>
+
+            <!-- Choose Authentication Method -->
+            <label for="auth_method">Choose Authentication Method:</label><br>
+            <input type="radio" id="telegram" name="auth_method" value="telegram" required>
+            <label for="telegram">Telegram</label><br>
+            <input type="radio" id="whatsapp" name="auth_method" value="whatsapp" required>
+            <label for="whatsapp">WhatsApp</label><br>
 
             <input type="submit" value="Sign Up">
         </form>

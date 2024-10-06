@@ -20,7 +20,7 @@ body {
     width: 100%;
 }
 
-/* Heading */
+/* Heading styling */
 h2 {
     text-align: center;
     margin-bottom: 30px;
@@ -41,55 +41,63 @@ label {
     margin-bottom: 5px;
     color: #333;
     font-size: 14px;
+    text-align: left;
 }
 
 /* Input field styling */
 input[type="text"],
 input[type="password"],
-input[type="tel"] {  /* Added input[type="tel"] for telephone */
-    padding: 10px;
-    margin-bottom: 20px;
+input[type="tel"] {
+    padding: 12px;
+    margin-bottom: 15px;
     border: 1px solid #ccc;
-    border-radius: 4px;
+    border-radius: 5px;
     font-size: 16px;
     width: 100%;
     box-sizing: border-box;
 }
 
+/* Authentication method (radio buttons) styling */
+.radio-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+}
+
+.radio-group label {
+    font-weight: normal;
+    color: #666;
+    font-size: 16px;
+    margin-right: 20px;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+}
+
+.radio-group input[type="radio"] {
+    margin-right: 10px;
+}
+
 /* Button styling */
-input[type="submit"],
-input[type="button"] {
+input[type="submit"] {
     padding: 12px;
     background-color: #4CAF50;
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: 5px;
     cursor: pointer;
     font-size: 16px;
     transition: background-color 0.3s ease;
     margin-bottom: 10px;
 }
 
-input[type="button"] {
-    background-color: #ffffff;
-    color: #4CAF50;
-    border: 2px solid #4CAF50;
-}
-
 input[type="submit"]:hover {
     background-color: #45a049;
 }
 
-input[type="button"]:hover {
-    background-color: #4CAF50;
-    color: white;
-}
-
-/* Styling for flash messages (optional) */
-ul {
-    color: red;
-    list-style-type: none;
-    padding: 0;
-    text-align: center;
-    font-size: 14px;
+/* Responsive design for mobile */
+@media screen and (max-width: 600px) {
+    .container {
+        width: 90%;
+    }
 }

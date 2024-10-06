@@ -73,8 +73,6 @@ def settings():
     else:
         return redirect(url_for('login'))
 
-
-
 # Function to fetch data from a CSV file
 def fetch_data():
     data = []
@@ -126,26 +124,44 @@ def signup():
         username = request.form['username']
         password = request.form['password']
         telephone = request.form['telephone']
+        auth_method = request.form['auth_method']  # Fetch the chosen authentication method
 
-        # Hash the password with the correct method
+        # Hash the password
         hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
 
         # Check if the user already exists
         if username in users_db:
-            flash('Username already exists! Please choose a different one.')
+            flash('Username already exists! Please choose a different one.', 'error')
             return redirect(url_for('signup'))
 
-        # Add new user to the database with the telephone number
+        # Add new user to the database with the telephone number and chosen auth method
         users_db[username] = {
             'password': hashed_password,
-            'telephone': telephone
+            'telephone': telephone,
+            'auth_method': auth_method  # Store the selected authentication method
         }
         save_users(users_db)  # Save the updated users to the JSON file
-        flash('User registered successfully! You can now log in.')
-        return redirect(url_for('login'))
+
+        # Debugging flash message
+        flash(f'Redirecting to {auth_method} authentication', 'info')
+
+        # Redirect based on the authentication method chosen
+        if auth_method == 'telegram':
+            return redirect(url_for('telegram_instructions'))
+        elif auth_method == 'whatsapp':
+            return redirect(url_for('whatsapp_auth'))
 
     return render_template('signup.html')
 
+# Route for Telegram authentication instructions
+@app.route('/telegram_instructions')
+def telegram_instructions():
+    return render_template('telegram_instructions.html')
+
+# Route for WhatsApp authentication instructions
+@app.route('/whatsapp_auth')
+def whatsapp_auth():
+    return "You have chosen WhatsApp authentication. (Implement WhatsApp API here)"
 
 
 # Logout route

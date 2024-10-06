@@ -1,8 +1,6 @@
-from dustbin import Dustbin
 from server import TelegramBot
 import asyncio
 from config_reader import ConfigReader
-from dustbinanalysertop import DustbinAnalyser
 
 # Main
 if __name__ == "__main__":

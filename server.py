@@ -3,8 +3,7 @@ import asyncio
 from aiogram import Bot
 from telethon import TelegramClient, events, Button
 from aiogram.types import FSInputFile # use for message handler
-from dustbinanalysertop import DustbinAnalyser
-from dustbin import Dustbin
+from storageTank.dustbinanalysertop import *
 from config_reader import ConfigReader
 from security.user_authenticator import UserAuthenticator
 import time

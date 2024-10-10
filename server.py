@@ -3,7 +3,7 @@ import asyncio
 from aiogram import Bot
 from telethon import TelegramClient, events, Button
 from aiogram.types import FSInputFile # use for message handler
-from storageTank.dustbinanalysertop import *
+from storageTank.stockAnalyser import *
 from config_reader import ConfigReader
 import time
 
@@ -11,30 +11,31 @@ class TelegramBot:
     """
     A Telegram bot that interacts with users and performs various tasks related to dustbin monitoring and analysis.
     """
-    def __init__(self, configReader: ConfigReader, dustbin_analyser:DustbinAnalyser=None):
+    def __init__(self, configReader: ConfigReader, stock_analyser:StockAnalyser=None):
         # Parameter
         token = configReader.get_param('TELEGRAM', 'token')
         api_id = configReader.get_param('TELEGRAM', 'api_id')
         api_hash = configReader.get_param('TELEGRAM', 'api_hash')
         self.interval = int(configReader.get_param('TELEGRAM', 'interval'))
         self.alert_frequency = int(configReader.get_param('TELEGRAM', 'alert_frequency'))
+        
         self.count = 0
         self.chat_ids = set()  # Store chat_ids of users who interact with the bot
         self.logged_in_users = set()
         self.pending_login = {}  # Track login state for each user
-        
-        self.flask_server_url = "http://192.168.137.252:5000"
-
+        ip = configReader.get_param('RASPI', 'ip')
+        port_num = configReader.get_param('RASPI', 'port_num')
+        self.flask_server_url = f"http://{ip}:{port_num}"
 
         # Set up telegram bot and dustbin analyzer
         print(token)
         self.bot = Bot(token)
         self.client = TelegramClient('bot', api_id, api_hash).start(bot_token=token)
-        if(dustbin_analyser == None):
+        if(stock_analyser == None):
             self.exist_analyser = 0
         else:
             self.exist_analyser = 1
-            self.data_analyser: DustbinAnalyser = dustbin_analyser
+            self.data_analyser = stock_analyser
 
         # Register event handlers
         self.register_handlers()
@@ -242,7 +243,6 @@ class TelegramBot:
                 # print("No data analyser available.")
                 print("pending", self.pending_login)
                 print("logged in", self.logged_in_users)
-                pass
             else:
                 self.data_analyser.getThingspeakData()  # Fetch the latest data
                 self.data_analyser.analyseData()        # Analyse the fetched data

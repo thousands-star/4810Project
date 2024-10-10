@@ -1,8 +1,7 @@
-Fullness for Each Dustbin
-Dustbin "Dustbin 1": 84.47%
-Dustbin "Dustbin 2": 91.05%
-Dustbin "Dustbin 3": 73.56%
-Dustbin "Dustbin 4": 97.84%
-Up to Now:
-Most occupied: Dustbin "Dustbin 4" - 97.84%
-Least occupied: Dustbin "Dustbin 3" - 73.56%
+Fullness for Each Storage Tank
+Storage Tank "Grains": 29.20%
+Storage Tank "Sugar": 62.50%
+Storage Tank "Flour": 26.42%
+Storage Tank "Dry legumes": 27.70%
+Note: Highest stock level in Storage Tank "Sugar" - 62.50%. Check for potential expiration.
+Stock replenishment needed for Storage Tank "Flour" - 26.42% remaining.

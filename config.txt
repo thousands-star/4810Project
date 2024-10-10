@@ -5,23 +5,28 @@ api_hash = e8588c6943546109a766c35f02e7cea5
 interval = 1
 alert_frequency = 15
 
+[RASPI]
+ip = 192.168.137.252
+port_num = 5000
+
 [THINGSPEAK]
-read_api_keys = FR97G4Z3JFM9LK4Z,DT76O8OQ5F0ZWLXW,CJGXBTKXSZDJHPU2,XG4JT6TJMMCCNK5G
-write_api_key = NVF9Q3QGYMYRLCKJ
-channel_ids = 2623642,2615870,2623647,2623708
+read_api_keys = FR97G4Z3JFM9LK4Z,DT76O8OQ5F0ZWLXW,CJGXBTKXSZDJHPU2,OL7HGXGXD96A1WV8
+us_write_api_keys = LISTAUKF24AX59FX,9LLJQQEUM2284UYV,ELTZAQ5DG2ZWCXD4,1GU510BC8CFY7C90
+as_write_api_key = NVF9Q3QGYMYRLCKJ
+channel_ids = 2623642,2615870,2623647,2692256
 
-[DUSTBIN_1]
-depth = 45.6
-tag = "Dustbin 1"
+[STORAGE_TANK_1]
+depth = 10
+tag = "Grains"
 
-[DUSTBIN_2]
-depth = 50.3
-tag = "Dustbin 2"
+[STORAGE_TANK_2]
+depth = 12
+tag = "Sugar"
 
-[DUSTBIN_3]
-depth = 48.9
-tag = "Dustbin 3"
+[STORAGE_TANK_3]
+depth = 12
+tag = "Flour"
 
-[DUSTBIN_4]
-depth = 55.0
-tag = "Dustbin 4"
+[STORAGE_TANK_4]
+depth = 10
+tag = "Dry legumes"

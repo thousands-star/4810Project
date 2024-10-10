@@ -135,7 +135,7 @@ class DustbinAnalyser:
         self.dustbin_num = len(dustbin_list)
         for i in range(self.dustbin_num):
             self.raw_data_dict[i] = []
-        self.dustbin_list = dustbin_list                # A list of Dustbin objects         
+        self.dustbin_list: list[Dustbin] = dustbin_list                # A list of Dustbin objects         
         self.dustbin_fullness = [0]*self.dustbin_num    # A list to store the fullness of each dustbin
             
     def getThingspeakData(self):

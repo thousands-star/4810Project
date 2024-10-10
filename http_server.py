@@ -6,15 +6,18 @@ import time
 import csv
 import io
 import matplotlib.pyplot as plt
-from flask import send_file
+from flask import send_file, send_from_directory
 from server import TelegramBot
 from config_reader import ConfigReader
+import os
+
+
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
 # Replace this with the IP address of your Raspberry Pi running the Flask database server
-raspi_url = "http://192.168.133.95:5000"
+raspi_url = "http://192.168.137.252:5000"
 configReader = ConfigReader()
 telegram_token = configReader.get_param('TELEGRAM', 'token')
 
@@ -165,26 +168,34 @@ def main():
 # Route to generate and return the plot image
 @app.route('/plot_data')
 def plot_data():
-    data = fetch_data()  # Fetch the data from the CSV
-    dates = [row['date'] for row in data]
-    values = [float(row['value']) for row in data]
+    # Path to the directory where 'dustbin_fullness.png' is located
+    image_directory = app.root_path  # Assuming the image is in the 'static' folder
+    image_filename = 'dustbin_fullness.png'
+    
+    # Return the image from the static folder
+    return send_from_directory(image_directory, image_filename, mimetype='image/png')
 
-    # Create a plot with Matplotlib
-    plt.figure(figsize=(10, 5))
-    plt.plot(dates, values, marker='o')
-    plt.title('Data Plot')
-    plt.xlabel('Date')
-    plt.ylabel('Value')
-    plt.xticks(rotation=45)
+# def plot_data():
+#     data = fetch_data()  # Fetch the data from the CSV
+#     dates = [row['date'] for row in data]
+#     values = [float(row['value']) for row in data]
 
-    # Save plot to a BytesIO object
-    img = io.BytesIO()
-    plt.savefig(img, format='png')
-    img.seek(0)
-    plt.close()
+#     # Create a plot with Matplotlib
+#     plt.figure(figsize=(10, 5))
+#     plt.plot(dates, values, marker='o')
+#     plt.title('Data Plot')
+#     plt.xlabel('Date')
+#     plt.ylabel('Value')
+#     plt.xticks(rotation=45)
 
-    # Return the image as a response
-    return send_file(img, mimetype='image/png')
+#     # Save plot to a BytesIO object
+#     img = io.BytesIO()
+#     plt.savefig(img, format='png')
+#     img.seek(0)
+#     plt.close()
+
+#     # Return the image as a response
+#     return send_file(img, mimetype='image/png')
 
 
 @app.route('/signup', methods=['GET', 'POST'])

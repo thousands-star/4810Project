@@ -1,6 +1,7 @@
 from server import TelegramBot
 import asyncio
 from config_reader import ConfigReader
+from storageTank.dustbinanalysertop import DustbinAnalyser
 
 # Main
 if __name__ == "__main__":
@@ -10,7 +11,8 @@ if __name__ == "__main__":
 
     # Create an instance of the TelegramBot class
     # Turn off the dustbin_analyser
-    bot = TelegramBot(configReader = config_reader, dustbin_analyser=None)
+    dustbin_analyser = DustbinAnalyser(configReader = config_reader)
+    bot = TelegramBot(configReader = config_reader, dustbin_analyser=dustbin_analyser)
 
     print("Setup Completed!")
 

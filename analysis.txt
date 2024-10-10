@@ -1,1 +1,8 @@
-A dummy Message
+Fullness for Each Dustbin
+Dustbin "Dustbin 1": 84.47%
+Dustbin "Dustbin 2": 91.05%
+Dustbin "Dustbin 3": 73.56%
+Dustbin "Dustbin 4": 97.84%
+Up to Now:
+Most occupied: Dustbin "Dustbin 4" - 97.84%
+Least occupied: Dustbin "Dustbin 3" - 73.56%

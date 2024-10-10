@@ -23,7 +23,7 @@ class TelegramBot:
         self.logged_in_users = set()
         self.pending_login = {}  # Track login state for each user
         
-        self.flask_server_url = "192.168.133.95"
+        self.flask_server_url = "http://192.168.137.252:5000"
 
 
         # Set up telegram bot and dustbin analyzer
@@ -33,7 +33,8 @@ class TelegramBot:
         if(dustbin_analyser == None):
             self.exist_analyser = 0
         else:
-            self.data_analyser = dustbin_analyser
+            self.exist_analyser = 1
+            self.data_analyser: DustbinAnalyser = dustbin_analyser
 
         # Register event handlers
         self.register_handlers()
@@ -250,7 +251,7 @@ class TelegramBot:
                     for i in range(self.data_analyser.getDustbinNumber()):
                         fullness = self.data_analyser.getDustbinFullness()[i]
                         if fullness >= 80:
-                            message = f"Alert: Dustbin {self.dustbin_list[i].get_tag()} is {fullness:.2f}% full. Please empty it."
+                            message = f"Alert: Dustbin {self.data_analyser.dustbin_list[i].get_tag()} is {fullness:.2f}% full. Please empty it."
                             for chat_id in self.chat_ids:
                                 await self.bot.send_message(chat_id, message)
                 self.data_analyser.updateThingspeak()   # Update Thingspeak with the analysed data

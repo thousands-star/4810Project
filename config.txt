@@ -2,11 +2,12 @@
 token = 7313428073:AAFBJn9Uk5u6u7wIoijA4UDCsH8V7ia26Fo
 api_id = 28215074
 api_hash = e8588c6943546109a766c35f02e7cea5
-interval = 1
-alert_frequency = 15
+interval = 15
+alert_frequency = 20
+fullness_alert_threshold = 30
 
 [RASPI]
-ip = 192.168.137.252
+ip = 192.168.137.108
 port_num = 5000
 
 [THINGSPEAK]
@@ -29,4 +30,4 @@ tag = "Flour"
 
 [STORAGE_TANK_4]
 depth = 10
-tag = "Dry legumes"
+tag = "Legumes"

@@ -17,9 +17,11 @@ app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
 # Replace this with the IP address of your Raspberry Pi running the Flask database server
-raspi_url = "http://192.168.137.252:5000"
 configReader = ConfigReader()
 telegram_token = configReader.get_param('TELEGRAM', 'token')
+ip = configReader.get_param('RASPI', 'ip')
+port_num = configReader.get_param('RASPI', 'port_num')
+raspi_url = f"http://{ip}:{port_num}"
 
 def save_user(data):
     try:
@@ -170,8 +172,7 @@ def main():
 def plot_data():
     # Path to the directory where 'dustbin_fullness.png' is located
     image_directory = app.root_path  # Assuming the image is in the 'static' folder
-    image_filename = 'dustbin_fullness.png'
-    
+    image_filename = 'storagetank_fullness.png'
     # Return the image from the static folder
     return send_from_directory(image_directory, image_filename, mimetype='image/png')
 

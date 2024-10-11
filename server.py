@@ -1,9 +1,8 @@
-
+import requests
 import asyncio
 from aiogram import Bot
 from telethon import TelegramClient, events, Button
 from aiogram.types import FSInputFile # use for message handler
-from storageTank.stockAnalyser import *
 from config_reader import ConfigReader
 import time
 
@@ -11,13 +10,15 @@ class TelegramBot:
     """
     A Telegram bot that interacts with users and performs various tasks related to dustbin monitoring and analysis.
     """
-    def __init__(self, configReader: ConfigReader, stock_analyser:StockAnalyser=None):
+    def __init__(self, configReader: ConfigReader, exist_analyser=True):
         # Parameter
+        self.exist_analyser = exist_analyser
         token = configReader.get_param('TELEGRAM', 'token')
         api_id = configReader.get_param('TELEGRAM', 'api_id')
         api_hash = configReader.get_param('TELEGRAM', 'api_hash')
         self.interval = int(configReader.get_param('TELEGRAM', 'interval'))
         self.alert_frequency = int(configReader.get_param('TELEGRAM', 'alert_frequency'))
+        self.fullness_alert_threshold = float(configReader.get_param('TELEGRAM', 'fullness_alert_threshold'))
         
         self.count = 0
         self.chat_ids = set()  # Store chat_ids of users who interact with the bot
@@ -26,17 +27,11 @@ class TelegramBot:
         ip = configReader.get_param('RASPI', 'ip')
         port_num = configReader.get_param('RASPI', 'port_num')
         self.flask_server_url = f"http://{ip}:{port_num}"
-
+        print(self.flask_server_url)
         # Set up telegram bot and dustbin analyzer
         print(token)
         self.bot = Bot(token)
         self.client = TelegramClient('bot', api_id, api_hash).start(bot_token=token)
-        if(stock_analyser == None):
-            self.exist_analyser = 0
-        else:
-            self.exist_analyser = 1
-            self.data_analyser = stock_analyser
-
         # Register event handlers
         self.register_handlers()
 
@@ -239,26 +234,64 @@ class TelegramBot:
     async def periodic_task(self):
         while True:
             self.count += 1
-            if self.exist_analyser == 0:
+            if not self.exist_analyser:
                 # print("No data analyser available.")
                 print("pending", self.pending_login)
                 print("logged in", self.logged_in_users)
             else:
-                self.data_analyser.getThingspeakData()  # Fetch the latest data
-                self.data_analyser.analyseData()        # Analyse the fetched data
+                # load the analysis.txt and storagetank_fullness.png
+                # Download analysis.txt
+                analysis_response = requests.get(f"{self.flask_server_url}/get_analysis")
+                if analysis_response.status_code == 200:
+                    with open('analysis.txt', 'wb') as file:
+                        file.write(analysis_response.content)
+                    print("analysis.txt downloaded successfully.")
+                else:
+                    print("Failed to download analysis.txt")
+
+                # Download storagetank_fullness.png
+                image_response = requests.get(f"{self.flask_server_url}/get_fullness_image")
+                if image_response.status_code == 200:
+                    with open('storagetank_fullness.png', 'wb') as file:
+                        file.write(image_response.content)
+                    print("storagetank_fullness.png downloaded successfully.")
+                else:
+                    print("Failed to download storagetank_fullness.png")
                 
-                if self.count % self.alert_frequency == 0:  # Prevent spamming alerts
-                    for i in range(self.data_analyser.getDustbinNumber()):
-                        fullness = self.data_analyser.getDustbinFullness()[i]
-                        if fullness >= 80:
-                            message = f"Alert: Dustbin {self.data_analyser.dustbin_list[i].get_tag()} is {fullness:.2f}% full. Please empty it."
+                # Get fullness.txt from Flask API
+                response_txt = requests.get(f"{self.flask_server_url}/get_fullness_txt")
+                if response_txt.status_code == 200:
+                    with open('fullness.txt', 'wb') as f:
+                        f.write(response_txt.content)  # Save the fullness.txt locally
+                    print("fullness.txt downloaded successfully.")
+                    message_list = self.handle_alert_message()
+                    if message_list:
+                        for message in message_list:
                             for chat_id in self.chat_ids:
                                 await self.bot.send_message(chat_id, message)
-                self.data_analyser.updateThingspeak()   # Update Thingspeak with the analysed data
-                self.data_analyser.plotFullness()       # Plot the latest data
-            
+                else:
+                    print("Failed to fullness.txt")
+                    
+                                
             await asyncio.sleep(self.interval)
-
+                        
+    
+    def handle_alert_message(self):
+        # Open the file for reading
+        message_list = []
+        with open('fullness.txt', 'r') as file:
+            for line in file:
+                line = line.strip()
+                name, fullness = line.split()
+                # Convert fullness to a float
+                fullness = float(fullness)
+                # Print the results (or do something with them)
+                # print(f"Item: {name}, Fullness: {fullness}")
+                if fullness < self.fullness_alert_threshold:
+                    message = f"Alert: The stock of {name} is running low at {fullness:.2f}%. Please consider restocking soon."
+                    message_list.append(message)
+        return message_list
+                    
     """
     Bot operations 
     """

@@ -10,6 +10,8 @@ from flask import send_file, send_from_directory
 from server import TelegramBot
 from config_reader import ConfigReader
 import os
+import rsa
+import base64
 
 
 
@@ -22,10 +24,31 @@ telegram_token = configReader.get_param('TELEGRAM', 'token')
 ip = configReader.get_param('RASPI', 'ip')
 port_num = configReader.get_param('RASPI', 'port_num')
 raspi_url = f"http://{ip}:{port_num}"
+public_key = None
+
+def get_public_key():
+    global public_key
+    # Request the public key from the server
+    response = requests.get(f'http://{ip}:5000/get_public_key')
+    public_key_pem = response.json()['public_key']
+
+    # Load the public key
+    public_key = rsa.PublicKey.load_pkcs1(public_key_pem.encode())
+
+def encrypt_json(data):
+    global public_key
+    json_credentials = json.dumps(data)
+    encoded_credentials = json_credentials.encode()
+    # Encrypt the credentials using the public key
+    encrypted_message = rsa.encrypt(encoded_credentials, public_key)
+    # Encode the encrypted message in base64 for HTTP transmission
+    encrypted_message_base64 = base64.b64encode(encrypted_message).decode()
+    return encrypted_message_base64
+
 
 def save_user(data):
     try:
-        response = requests.post(f"{raspi_url}/register", json=data)
+        response = requests.post(f"{raspi_url}/register", json={"encrypted_message": encrypt_json(data)})
         return response
     except Exception as e:
         print(f"Error connecting to the database: {e}")
@@ -33,7 +56,7 @@ def save_user(data):
 
 def authenticate_user(data):
     try:
-        response = requests.post(f"{raspi_url}/login", json=data)
+        response = requests.post(f"{raspi_url}/login", json={"encrypted_message": encrypt_json(data)})
         return response
     except Exception as e:
         print(f"Error connecting to the database: {e}")
@@ -41,7 +64,7 @@ def authenticate_user(data):
 
 def add_chat_id(data):
     try:
-        response = requests.post(f"{raspi_url}/add_chat_id", json=data)
+        response = requests.post(f"{raspi_url}/add_chat_id", json={"encrypted_message": encrypt_json(data)})
         return response
     except Exception as e:
         print(f"Error connecting to the database: {e}")
@@ -51,7 +74,7 @@ def get_chat_id(username, password):
     try:
         # Send both username and password to the database server for verification
         data = {"username": username, "password": password}
-        response = requests.post(f"{raspi_url}/get_chat_id", json=data)
+        response = requests.post(f"{raspi_url}/get_chat_id", json={"encrypted_message": encrypt_json(data)})
 
         if response.status_code == 200:
             chat_id = response.json().get('chat_id')
@@ -175,28 +198,6 @@ def plot_data():
     image_filename = 'storagetank_fullness.png'
     # Return the image from the static folder
     return send_from_directory(image_directory, image_filename, mimetype='image/png')
-
-# def plot_data():
-#     data = fetch_data()  # Fetch the data from the CSV
-#     dates = [row['date'] for row in data]
-#     values = [float(row['value']) for row in data]
-
-#     # Create a plot with Matplotlib
-#     plt.figure(figsize=(10, 5))
-#     plt.plot(dates, values, marker='o')
-#     plt.title('Data Plot')
-#     plt.xlabel('Date')
-#     plt.ylabel('Value')
-#     plt.xticks(rotation=45)
-
-#     # Save plot to a BytesIO object
-#     img = io.BytesIO()
-#     plt.savefig(img, format='png')
-#     img.seek(0)
-#     plt.close()
-
-#     # Return the image as a response
-#     return send_file(img, mimetype='image/png')
 
 
 @app.route('/signup', methods=['GET', 'POST'])

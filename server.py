@@ -5,6 +5,10 @@ from telethon import TelegramClient, events, Button
 from aiogram.types import FSInputFile # use for message handler
 from config_reader import ConfigReader
 import time
+# this is for encryption
+import rsa
+import json
+import base64
 
 class TelegramBot:
     """
@@ -28,13 +32,50 @@ class TelegramBot:
         port_num = configReader.get_param('RASPI', 'port_num')
         self.flask_server_url = f"http://{ip}:{port_num}"
         print(self.flask_server_url)
+        self.public_key = None
         # Set up telegram bot and dustbin analyzer
         print(token)
         self.bot = Bot(token)
         self.client = TelegramClient('bot', api_id, api_hash).start(bot_token=token)
         # Register event handlers
         self.register_handlers()
+    
 
+    def get_public_key(self):
+        # Request the public key from the server
+        print("\n-----------Get Public Key Session----------")
+        response = requests.get(f"{self.flask_server_url}/get_public_key")
+        public_key_pem = response.json()['public_key']
+        print("Public key retrieved!")
+        print("Public Key:")
+        
+        # Load the public key
+        self.public_key = rsa.PublicKey.load_pkcs1(public_key_pem.encode())
+        print(self.public_key)
+        print("-------------------------------------------\n")
+
+
+    def encrypt_json(self,data):
+        print("+++++++++++++++Encryption Session+++++++++++++++")
+        print("Original Data:")
+        print(data)
+        if self.public_key is None:
+            self.get_public_key()
+        else:
+            print("\nPublic Key:")
+            print(self.public_key)
+        
+        json_credentials = json.dumps(data)
+        encoded_credentials = json_credentials.encode()
+        # Encrypt the credentials using the public key
+        encrypted_message = rsa.encrypt(encoded_credentials, self.public_key)
+        # Encode the encrypted message in base64 for HTTP transmission
+        encrypted_message_base64 = base64.b64encode(encrypted_message).decode()
+        print("\n Encrypted Message:")
+        print(encrypted_message_base64 + "\n")
+        print("+++++++++++++++++++++++++++++++++++++++++++++++++")
+        return encrypted_message_base64
+    
     def authenticate_user(self, username, password):
         """
         Sends login credentials to the Flask server for authentication.
@@ -43,8 +84,9 @@ class TelegramBot:
             "username": username,
             "password": password
         }
+        
         try:
-            response = requests.post(f"{self.flask_server_url}/login", json=data)
+            response = requests.post(f"{self.flask_server_url}/login", json={"encrypted_message": self.encrypt_json(data)})
             return response
         except Exception as e:
             print(f"Error authenticating user: {e}")
@@ -59,7 +101,7 @@ class TelegramBot:
             "chat_id": chat_id
         }
         try:
-            response = requests.post(f"{self.flask_server_url}/add_chat_id", json=data)
+            response = requests.post(f"{self.flask_server_url}/add_chat_id", json={"encrypted_message": self.encrypt_json(data)}) # encrypt_json(data)
             if response.status_code == 200:
                 print(f"Chat ID for {username} successfully added to the database.")
             else:
@@ -190,7 +232,7 @@ class TelegramBot:
             await self.main_menu(event)
             return
         await self.bot.send_message(event.chat_id, "Here is the graph of the current fullness:")
-        file_to_send = FSInputFile("dustbin_fullness.png")
+        file_to_send = FSInputFile("storagetank_fullness.png")
         await self.bot.send_document(event.chat_id, file_to_send)
 
     # This function responsible for sending a web-based real-time analyzed data 

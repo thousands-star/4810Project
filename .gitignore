@@ -5,3 +5,4 @@ bot.session
 /security/__pycache__
 users.json
 data.csv
+config.txt

@@ -24,16 +24,19 @@ telegram_token = configReader.get_param('TELEGRAM', 'token')
 ip = configReader.get_param('RASPI', 'ip')
 port_num = configReader.get_param('RASPI', 'port_num')
 raspi_url = f"http://{ip}:{port_num}"
+print(raspi_url)
 public_key = None
 
 def get_public_key():
     global public_key
     # Request the public key from the server
-    response = requests.get(f'http://{ip}:5000/get_public_key')
+    response = requests.get(f"{raspi_url}/get_public_key")
     public_key_pem = response.json()['public_key']
 
     # Load the public key
     public_key = rsa.PublicKey.load_pkcs1(public_key_pem.encode())
+
+get_public_key()
 
 def encrypt_json(data):
     global public_key
@@ -52,6 +55,7 @@ def save_user(data):
         return response
     except Exception as e:
         print(f"Error connecting to the database: {e}")
+        get_public_key()
         return None
 
 def authenticate_user(data):
@@ -60,6 +64,7 @@ def authenticate_user(data):
         return response
     except Exception as e:
         print(f"Error connecting to the database: {e}")
+        get_public_key()
         return None
 
 def add_chat_id(data):
@@ -68,6 +73,7 @@ def add_chat_id(data):
         return response
     except Exception as e:
         print(f"Error connecting to the database: {e}")
+        get_public_key()
         return None
 
 def get_chat_id(username, password):
@@ -85,6 +91,7 @@ def get_chat_id(username, password):
             return None
     except Exception as e:
         print(f"Error connecting to the database: {e}")
+        get_public_key()
         return None
 
 @app.route('/')

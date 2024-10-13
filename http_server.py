@@ -30,22 +30,38 @@ public_key = None
 def get_public_key():
     global public_key
     # Request the public key from the server
+    print("\n-----------Get Public Key Session----------")
     response = requests.get(f"{raspi_url}/get_public_key")
     public_key_pem = response.json()['public_key']
-
+    print("Public key retrieved!")
+    print("Public Key:")
+    
     # Load the public key
     public_key = rsa.PublicKey.load_pkcs1(public_key_pem.encode())
+    print(public_key)
+    print("-------------------------------------------\n")
 
-get_public_key()
 
 def encrypt_json(data):
     global public_key
+    print("+++++++++++++++Encryption Session+++++++++++++++")
+    print("Original Data:")
+    print(data)
+    if public_key is None:
+        get_public_key()
+    else:
+        print("\nPublic Key:")
+        print(public_key)
+    
     json_credentials = json.dumps(data)
     encoded_credentials = json_credentials.encode()
     # Encrypt the credentials using the public key
     encrypted_message = rsa.encrypt(encoded_credentials, public_key)
     # Encode the encrypted message in base64 for HTTP transmission
     encrypted_message_base64 = base64.b64encode(encrypted_message).decode()
+    print("\n Encrypted Message:")
+    print(encrypted_message_base64 + "\n")
+    print("+++++++++++++++++++++++++++++++++++++++++++++++++")
     return encrypted_message_base64
 
 

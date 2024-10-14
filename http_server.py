@@ -47,12 +47,9 @@ def encrypt_json(data):
     print("+++++++++++++++Encryption Session+++++++++++++++")
     print("Original Data:")
     print(data)
-    if public_key is None:
-        get_public_key()
-    else:
-        print("\nPublic Key:")
-        print(public_key)
-    
+    get_public_key()
+
+    # Encode the JSON credentials in base64
     json_credentials = json.dumps(data)
     encoded_credentials = json_credentials.encode()
     # Encrypt the credentials using the public key

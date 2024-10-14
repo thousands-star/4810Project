@@ -5,7 +5,7 @@ body {
     padding: 0;
     display: flex;
     height: 100vh;
-    overflow: hidden;
+    overflow: auto; /* Allow the page to scroll if needed */
 }
 
 /* Sidebar styling */
@@ -20,13 +20,11 @@ body {
     box-sizing: border-box;
 }
 
-/* Sidebar header */
 .sidebar h2 {
     color: white;
     text-align: center;
 }
 
-/* Sidebar links */
 .sidebar ul {
     list-style-type: none;
     padding: 0;
@@ -51,12 +49,13 @@ body {
 
 /* Main content styling */
 .content {
-    margin-left: 250px; /* Same width as the sidebar */
+    margin-left: 250px;
     padding: 20px;
     flex-grow: 1;
     background-color: #f0f0f0;
-    height: 100%;
+    height: auto; /* Allow the content area to grow with the page */
     box-sizing: border-box;
+    overflow: hidden;
 }
 
 .content h1 {
@@ -71,4 +70,45 @@ body {
     max-width: 100%;
     height: auto;
     margin-top: 20px;
+}
+
+/* Info boxes styling */
+.info-boxes {
+    display: flex;
+    flex-wrap: wrap; /* Allow wrapping of boxes on smaller screens */
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.info-box {
+    width: 22%;
+    background-color: #333;
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    margin-bottom: 10px; /* Ensure spacing between rows of boxes */
+}
+
+.info-box h3 {
+    margin-bottom: 10px;
+    font-size: 18px;
+}
+
+.info-box p {
+    font-size: 24px;
+    margin: 0;
+}
+
+/* Make the boxes responsive for smaller screens */
+@media screen and (max-width: 900px) {
+    .info-box {
+        width: 45%; /* Two boxes per row */
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .info-box {
+        width: 100%; /* One box per row for mobile screens */
+    }
 }

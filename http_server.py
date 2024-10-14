@@ -205,7 +205,18 @@ def fetch_data():
 @app.route('/main')
 def main():
     if 'username' in session:
-        return render_template('main.html')
+        # These values can come from a database, API, or calculation
+        fullness = 55  # Example fullness value
+        queries_processed = 28684  # Example value for processed queries
+        queries_blocked = 5804  # Example value for blocked queries
+        blocklist_domains = 996610  # Example value for blocklist domains
+
+        # Pass the values to the template
+        return render_template('main.html', 
+                               fullness=fullness, 
+                               queries_processed=queries_processed, 
+                               queries_blocked=queries_blocked, 
+                               blocklist_domains=blocklist_domains)
     else:
         return redirect(url_for('login'))
 
@@ -226,27 +237,28 @@ def signup():
         username = request.form['username']
         password = request.form['password']
         telephone = request.form['telephone']
-        auth_method = request.form['auth_method']  # Fetch the chosen authentication method
-
+        selfie = request.files.get('selfie')  # Get the uploaded image if provided
 
         # Prepare user data for registration
         user_data = {
             'username': username,
             'password': password,
             'telephone': telephone,
-            'auth_method': auth_method,
+            'auth_method': 'telegram',  # Default authentication method is Telegram
             'chat_id': None  # Initially no chat ID
         }
+
+        # Handle image upload (optional)
+        if selfie:
+            selfie.save(f'static/uploads/{username}.jpg')  # Save the image as username.jpg
 
         # Send a request to the Raspberry Pi server to save the user
         response = save_user(user_data)
 
         if response and response.status_code == 201:
             flash('Signup successful!', 'success')
-            if auth_method == 'telegram':
-                return redirect(url_for('telegram_instructions'))
-            elif auth_method == 'whatsapp':
-                return redirect(url_for('whatsapp_auth'))
+            # Redirect to Telegram instructions by default
+            return redirect(url_for('telegram_instructions'))
         else:
             flash('Signup failed. Please try again.', 'error')
             return redirect(url_for('signup'))

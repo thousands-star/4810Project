@@ -47,7 +47,8 @@ label {
 /* Input field styling */
 input[type="text"],
 input[type="password"],
-input[type="tel"] {
+input[type="tel"],
+input[type="file"] {
     padding: 12px;
     margin-bottom: 15px;
     border: 1px solid #ccc;
@@ -57,29 +58,8 @@ input[type="tel"] {
     box-sizing: border-box;
 }
 
-/* Authentication method (radio buttons) styling */
-.radio-group {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 20px;
-}
-
-.radio-group label {
-    font-weight: normal;
-    color: #666;
-    font-size: 16px;
-    margin-right: 20px;
-    margin-bottom: 5px;
-    display: flex;
-    align-items: center;
-}
-
-.radio-group input[type="radio"] {
-    margin-right: 10px;
-}
-
 /* Button styling */
-input[type="submit"] {
+button, input[type="submit"] {
     padding: 12px;
     background-color: #4CAF50;
     color: white;
@@ -89,10 +69,18 @@ input[type="submit"] {
     font-size: 16px;
     transition: background-color 0.3s ease;
     margin-bottom: 10px;
+    text-align: center;
+    width: 100%;
 }
 
-input[type="submit"]:hover {
+button:hover, input[type="submit"]:hover {
     background-color: #45a049;
+}
+
+/* Selfie upload section styling */
+.selfie-section {
+    margin: 20px 0;
+    text-align: left;
 }
 
 /* Responsive design for mobile */

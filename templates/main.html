@@ -26,6 +26,25 @@
         <!-- Section for displaying the plot -->
         <img src="{{ url_for('plot_data') }}" alt="Data Plot">
 
+        <!-- New section for the dynamic information boxes -->
+        <div class="info-boxes">
+            <div class="info-box">
+                <h3>Current Fullness</h3>
+                <p>{{ fullness }}%</p>
+            </div>
+            <div class="info-box">
+                <h3>Queries Processed</h3>
+                <p>{{ queries_processed }}</p>
+            </div>
+            <div class="info-box">
+                <h3>Blocked Queries</h3>
+                <p>{{ queries_blocked }}</p>
+            </div>
+            <div class="info-box">
+                <h3>Blocklist Domains</h3>
+                <p>{{ blocklist_domains }}</p>
+            </div>
+        </div>
     </div>
 </body>
 </html>

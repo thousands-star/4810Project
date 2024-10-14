@@ -12,7 +12,7 @@ from config_reader import ConfigReader
 import os
 import rsa
 import base64
-
+from model_socket import initialize_model, predict_roc, predict_useuptime, read_fullness
 
 
 app = Flask(__name__)
@@ -26,6 +26,7 @@ port_num = configReader.get_param('RASPI', 'port_num')
 raspi_url = f"http://{ip}:{port_num}"
 print(raspi_url)
 public_key = None
+model_list = initialize_model()
 
 def get_public_key():
     global public_key
@@ -205,20 +206,30 @@ def fetch_data():
 @app.route('/main')
 def main():
     if 'username' in session:
-        # These values can come from a database, API, or calculation
-        fullness = 55  # Example fullness value
-        queries_processed = 28684  # Example value for processed queries
-        queries_blocked = 5804  # Example value for blocked queries
-        blocklist_domains = 996610  # Example value for blocklist domains
-
-        # Pass the values to the template
+        fullness_list = read_fullness()
+        roc_list = []
+        depletion_list = []
+        for i in range(len(fullness_list)):
+            roc_list.append(round(predict_roc(model_list[i]), 2))
+            depletion_list.append(predict_useuptime(fullness_list[i], model_list[i]))
+            
+        # Placeholder data for ROC and depletion times for each tank
+        # roc_sugar = 5  # Example: Rate of consumption in kg/day
+        # depletion_sugar = "2024-11-30"  # Example: Expected depletion date
+        # roc_grains = 3  # Example for Tank 2
+        # depletion_grains = "2024-12-15"
+        # roc_flour = 4  # Example for Tank 3
+        # depletion_flour = "2024-12-20"
+        # roc_legumes = 2  # Example for Tank 4
+        # depletion_legumes = "2025-01-05"
         return render_template('main.html', 
-                               fullness=fullness, 
-                               queries_processed=queries_processed, 
-                               queries_blocked=queries_blocked, 
-                               blocklist_domains=blocklist_domains)
+                               roc_grains=roc_list[0], depletion_grains=depletion_list[0],
+                               roc_sugar=roc_list[1], depletion_sugar=depletion_list[1],
+                               roc_flour=roc_list[2], depletion_flour=depletion_list[2], 
+                               roc_legumes=roc_list[3], depletion_legumes=depletion_list[3])
     else:
         return redirect(url_for('login'))
+
 
 
 # Route to generate and return the plot image

@@ -7,7 +7,7 @@ alert_frequency = 20
 fullness_alert_threshold = 30
 
 [RASPI]
-ip = 192.168.137.149
+ip = 192.168.137.229
 port_num = 5000
 
 [THINGSPEAK]

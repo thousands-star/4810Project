@@ -1,10 +1,9 @@
-<!-- templates/main.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Main Page</title>
+    <title>Storage Surveillance</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='main_style.css') }}">
 </head>
 <body>
@@ -20,29 +19,40 @@
 
     <!-- Main Content -->
     <div class="content">
-        <h1>Welcome, {{ session['username'] }}!</h1>
-        <p>Here is your data plot:</p>
+        <h1>Welcome to the Storage Surveillance System, {{ session['username'] }}!</h1>
+        <p>Overall Storage Analysis:</p>
 
         <!-- Section for displaying the plot -->
-        <img src="{{ url_for('plot_data') }}" alt="Data Plot">
+        <div class="plot-container">
+            <img src="{{ url_for('plot_data') }}" alt="Data Plot">
+        </div>
 
         <!-- New section for the dynamic information boxes -->
         <div class="info-boxes">
-            <div class="info-box">
-                <h3>Current Fullness</h3>
-                <p>{{ fullness }}%</p>
+            <!-- Info Box for Tank 1 (Grains) -->
+            <div class="info-box grains">
+                <h3>Tank Grains</h3>
+                <p>Rate of Consumption: {{ roc_grains }} kg/min</p>
+                <p>Expected Depletion Time:</p>
+                <p>{{ depletion_grains }}</p>
             </div>
-            <div class="info-box">
-                <h3>Queries Processed</h3>
-                <p>{{ queries_processed }}</p>
+            <div class="info-box sugar">
+                <h3>Tank Sugar</h3>
+                <p>Rate of Consumption: {{ roc_sugar }} kg/min</p>
+                <p>Expected Depletion Time:</p>
+                <p>{{ depletion_sugar }}</p>
             </div>
-            <div class="info-box">
-                <h3>Blocked Queries</h3>
-                <p>{{ queries_blocked }}</p>
+            <div class="info-box flour">
+                <h3>Tank Flour</h3>
+                <p>Rate of Consumption: {{ roc_flour }} kg/min</p>
+                <p>Expected Depletion Time:</p>
+                <p>{{ depletion_flour }}</p>
             </div>
-            <div class="info-box">
-                <h3>Blocklist Domains</h3>
-                <p>{{ blocklist_domains }}</p>
+            <div class="info-box legumes">
+                <h3>Tank Legumes</h3>
+                <p>Rate of Consumption: {{ roc_legumes }} kg/min</p>
+                <p>Expected Depletion Time:</p>
+                <p>{{ depletion_legumes }}</p>
             </div>
         </div>
     </div>

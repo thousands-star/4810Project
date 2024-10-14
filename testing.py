@@ -1,6 +1,8 @@
 import joblib
 import numpy as np
 
+def initialize_model():
+    pass
 model_filename = "./model/model4.pkl"
 # Load the model from the file
 loaded_model = joblib.load(model_filename)

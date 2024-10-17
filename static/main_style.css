@@ -4,9 +4,6 @@ body {
     background-color: #f0f0f0;
     margin: 0;
     padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     height: 100vh;
 }
 
@@ -51,25 +48,10 @@ body {
 
 /* Main content styling */
 .content {
-    margin-left: 250px;
+    margin-left: 250px; /* This ensures the content starts after the sidebar */
     padding: 20px;
-    flex-grow: 1;
     background-color: #f0f0f0;
-    height: auto; /* Allow the content area to grow with the page */
     box-sizing: border-box;
-    overflow: hidden;
-}
-
-.content h1 {
-    color: #333;
-    font-size: 28px;
-    margin-bottom: 15px;
-}
-
-.content p {
-    color: #666;
-    font-size: 18px;
-    margin-bottom: 20px;
 }
 
 /* Centering the plot */
@@ -83,69 +65,82 @@ body {
     height: auto;
 }
 
-/* Info boxes styling */
-.info-boxes {
+/* Main layout styling */
+.main-layout {
     display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
+    justify-content: space-between; /* Keeps the graph on the left and boxes on the right */
+    align-items: flex-start;
+    height: 80vh;
+    padding: 0 40px; /* Add padding to the sides to avoid boxes going too close to the edges */
 }
 
-/* Different colors for each tank */
+/* Plot container aligned to the left */
+.plot-container {
+    width: 60%; /* Slightly reduce the width of the plot to give more space to the boxes */
+    padding-right: 40px; /* Add more space between the plot and boxes */
+    box-sizing: border-box;
+}
+
+/* Info boxes styling - positioned to the right */
+.info-boxes {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2 columns to form the square layout */
+    grid-gap: 20px; /* Adjust gap between boxes */
+    width: 45%; /* Increase the width of the box container */
+    padding: 10px; /* Add padding to ensure boxes don't go to the edges */
+}
+
+/* Info box styles */
 .info-box {
-    width: 22%;
-    padding: 20px;
+    padding: 20px; /* Keep the padding for consistent spacing */
     border-radius: 10px;
-    color: white;
     text-align: center;
-    margin-bottom: 20px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    height: 200px; /* Maintain the square shape */
+    display: flex; /* Use flexbox for alignment */
+    flex-direction: column; /* Align items vertically */
+    justify-content: center; /* Center the content vertically */
+    box-sizing: border-box;
+    word-wrap: break-word; /* Ensure long words or content wrap inside the box */
+    overflow: hidden; /* Prevent text from overflowing the box */
 }
 
-.info-box h3 {
-    font-size: 20px;
-    margin-bottom: 10px;
+/* Ensure text does not overflow the box */
+.info-box h3, .info-box p {
+    margin: 0;
+    padding: 5px 0;
+    line-height: 1.4; /* Slightly increase line height for readability */
+    word-break: break-word; /* Break long words to prevent overflow */
 }
 
-.info-box p {
-    font-size: 16px;
-    margin: 5px 0;
-}
 
-/* Different colors for each tank */
-.info-box.sugar {
-    background-color: #FFE0B2; /* Light pastel orange */
-}
 
+/* Different colors for each tank with softened shades */
 .info-box.grains {
-    background-color: #C8E6C9; /* Light pastel green */
+    background-color: #90CAF9; /* Soft blue */
+}
+
+.info-box.sugar {
+    background-color: #FFCDD2; /* Soft red */
 }
 
 .info-box.flour {
-    background-color: #BBDEFB; /* Light pastel blue */
+    background-color: #A5D6A7; /* Soft green */
 }
 
 .info-box.legumes {
-    background-color: #FFCCBC; /* Light pastel red-orange */
+    background-color: #D1C4E9; /* Soft purple */
 }
 
-/* Additional Styling */
-.info-box {
-    color: #333; /* Darker text color for better contrast with lighter backgrounds */
-    padding: 20px;
-    border-radius: 10px;
-    text-align: center;
-    margin-bottom: 20px;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Soft shadow for a cleaner look */
-}
+
 
 /* Responsive adjustments */
 @media screen and (max-width: 900px) {
-    .info-box {
-        width: 45%;
+    .main-layout {
+        flex-direction: column;
     }
-}
-
-@media screen and (max-width: 600px) {
-    .info-box {
+    .plot-container, .info-boxes {
         width: 100%;
     }
 }
+

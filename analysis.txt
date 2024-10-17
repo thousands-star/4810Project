@@ -1,8 +1,8 @@
 Fullness for Each Storage Tank
-Storage Tank "Grains": 29.20%
-Storage Tank "Sugar": 62.50%
-Storage Tank "Flour": 26.42%
+Storage Tank "Grains": 38.80%
+Storage Tank "Sugar": 65.00%
+Storage Tank "Flour": 49.42%
 Storage Tank "Legumes": 27.70%
 Note:
-Highest stock level in Storage Tank "Sugar" - 62.50%. Check for potential expiration.
-Stock replenishment needed for Storage Tank "Flour" - 26.42% remaining.
+Highest stock level in Storage Tank "Sugar" - 65.00%. Check for potential expiration.
+Stock replenishment needed for Storage Tank "Legumes" - 27.70% remaining.

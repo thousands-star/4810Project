@@ -9,6 +9,7 @@ import time
 import rsa
 import json
 import base64
+from model_socket import initialize_model, predict_roc, predict_useuptime, read_fullness, convert_minutes
 
 class TelegramBot:
     """
@@ -23,6 +24,7 @@ class TelegramBot:
         self.interval = int(configReader.get_param('TELEGRAM', 'interval'))
         self.alert_frequency = int(configReader.get_param('TELEGRAM', 'alert_frequency'))
         self.fullness_alert_threshold = float(configReader.get_param('TELEGRAM', 'fullness_alert_threshold'))
+        self.depletion_alert_threshold = float(configReader.get_param('TELEGRAM', 'depletion_alert_threshold'))
         
         self.count = 0
         self.chat_ids = set()  # Store chat_ids of users who interact with the bot
@@ -37,6 +39,7 @@ class TelegramBot:
         print(token)
         self.bot = Bot(token)
         self.client = TelegramClient('bot', api_id, api_hash).start(bot_token=token)
+        self.model_list = initialize_model()
         # Register event handlers
         self.register_handlers()
     
@@ -45,7 +48,7 @@ class TelegramBot:
         # Request the public key from the server
         print("\n-----------Get Public Key Session----------")
         response = requests.get(f"{self.flask_server_url}/get_public_key")
-        public_key_pem = response.json()['public_key']
+        public_key_pem = response.json().get('public_key')
         print("Public key retrieved!")
         print("Public Key:")
         
@@ -118,6 +121,8 @@ class TelegramBot:
         self.client.on(events.NewMessage(pattern='Send me to real-time'))(self.realTimeGraph)
         self.client.on(events.NewMessage(pattern='/start'))(self.main_menu)
         self.client.on(events.NewMessage(pattern='Back!'))(self.main_menu)
+        self.client.on(events.NewMessage(pattern='who_is_in'))(self.who_is_in_handler)
+        self.client.on(events.NewMessage(pattern='Monitor who is in the factory'))(self.who_is_in_handler)
         self.client.on(events.NewMessage(pattern='Send me a data analysis'))(self.sendDataAnalysis)
         self.client.on(events.NewMessage(pattern='Send me a graph of current fullness!'))(self.sendGraph)
         self.client.on(events.NewMessage(pattern='Login'))(self.login_handler)
@@ -160,6 +165,7 @@ class TelegramBot:
             "/start - Start the bot and see the main menu\n"
             "/help - Show this help message\n"
             "/logout - Log out of the bot\n"
+            "/who_is_in - Show who is in the factory\n"
             "\n"
             "Other commands available through buttons:\n"
             "- Real-time data\n"
@@ -205,7 +211,7 @@ class TelegramBot:
 
                         # Register the user's chat_id on the server
                         self.add_chat_id(username, user_id)
-
+                        self.chat_ids.add(user_id)
                         del self.pending_login[user_id]  # Clear pending login
                         await event.respond(f"Welcome, {username}! You are now logged in.")
                         await self.main_menu(event)
@@ -259,16 +265,48 @@ class TelegramBot:
             )
             return
 
-
         await event.respond(
             'Welcome to the bot! Choose an option:',
             buttons=[
                 [Button.text('Send me to real-time')],
                 [Button.text('Send me a data analysis')],
-                [Button.text('Send me a graph of current fullness!')]
+                [Button.text('Send me a graph of current fullness!')],
+                [Button.text('Monitor who is in the factory')]
             ]
         )
 
+    """
+        To monitor who is inside the factory in real time
+    """
+    async def who_is_in_handler(self, event):
+        """
+        Handler that retrieves the list of current occupants from the Flask server
+        and sends that information to the Telegram chat.
+        """
+        user_id = event.sender_id
+        print(f"Received '/who_is_in' command from user {user_id}")  # Debugging print
+
+        if user_id not in self.logged_in_users:
+            await event.respond("You need to log in to use this feature.")
+            return
+
+        # Make a request to the Flask server to get the list of occupants
+        try:
+            response = requests.get(f"{self.flask_server_url}/who_is_in")
+            if response.status_code == 200:
+                occupants_data = response.json()
+                occupants_list = occupants_data.get("occupants", [])
+
+                if occupants_list:
+                    occupants_str = "\n".join(occupants_list)
+                    await event.respond(f"Current occupants in the factory:\n{occupants_str}")
+                else:
+                    await event.respond("There is no one currently inside the factory.")
+            else:
+                await event.respond("Failed to retrieve occupants. Please try again later.")
+        except Exception as e:
+            print(f"Error requesting occupants list: {e}")
+            await event.respond("An error occurred while fetching the list of occupants.")
 
     """
     Dustbin Analyser(To get the lastest data and plot)
@@ -307,6 +345,8 @@ class TelegramBot:
                         f.write(response_txt.content)  # Save the fullness.txt locally
                     print("fullness.txt downloaded successfully.")
                     message_list = self.handle_alert_message()
+                    print("Message list:", message_list)
+                    print("CHAT IDS:", self.chat_ids)
                     if message_list:
                         for message in message_list:
                             for chat_id in self.chat_ids:
@@ -321,17 +361,37 @@ class TelegramBot:
     def handle_alert_message(self):
         # Open the file for reading
         message_list = []
-        with open('fullness.txt', 'r') as file:
-            for line in file:
-                line = line.strip()
-                name, fullness = line.split()
-                # Convert fullness to a float
-                fullness = float(fullness)
-                # Print the results (or do something with them)
-                # print(f"Item: {name}, Fullness: {fullness}")
-                if fullness < self.fullness_alert_threshold:
-                    message = f"Alert: The stock of {name} is running low at {fullness:.2f}%. Please consider restocking soon."
-                    message_list.append(message)
+        fullness_list, name_list = read_fullness()
+        # message_list.append("Alert ! ! !")
+        # with open('fullness.txt', 'r') as file:
+        #     for line in file:
+        #         line = line.strip()
+        #         name, fullness = line.split()
+        #         # Convert fullness to a float
+        #         fullness = float(fullness)
+        #         # Print the results (or do something with them)
+        #         # print(f"Item: {name}, Fullness: {fullness}")
+        for i in range(len(fullness_list)):
+            # if (fullness_list[i] < self.fullness_alert_threshold):
+            #     if i == 0:
+            #         message_list.append("Alert ! ! !")
+            #     message = f"The stock of {name_list[i]} is running low at {fullness_list[i]:.2f}%. Please consider restocking soon."
+            #     message_list.append(message)
+            #     depletion_time = predict_useuptime(fullness_list[i], self.model_list[i], False)
+            #     if depletion_time < self.depletion_alert_threshold:
+            #         day, hour, minute = convert_minutes(depletion_time)
+            #         message = f"{name_list[i]} will be depleted in {day} days {hour} hours {minute} minutes. Please restock soon."
+            #         message_list.append(message)
+            current_fullness = fullness_list[i]
+            depletion_time = predict_useuptime(current_fullness, self.model_list[i], False)
+            if depletion_time < self.depletion_alert_threshold:
+                if i == 0:
+                    message_list.append("Alert ! ! !")
+                day, hour, minute = convert_minutes(depletion_time)
+                message = f"{name_list[i]} will be depleted in {day} days {hour} hours {minute} minutes. Please restock soon."
+                message_list.append(message)
+            
+        # print(message_list)
         return message_list
                     
     """

@@ -9,7 +9,7 @@
 <body>
     <div class="container">
         <h2>Sign Up</h2>
-        <form action="/signup" method="POST" enctype="multipart/form-data">
+        <form id="signupForm" action="/signup" method="POST" enctype="multipart/form-data" onsubmit="return validateForm()">
             <label for="username">Username:</label>
             <input type="text" id="username" name="username" required><br>
 
@@ -19,14 +19,26 @@
             <label for="telephone">Telephone Number:</label>
             <input type="tel" id="telephone" name="telephone" required><br>
 
-            <!-- Selfie Upload Section -->
+            <!-- Image Upload Section -->
             <div class="selfie-section">
-                <label for="selfie">Optional: Upload an Image</label><br>
-                <input type="file" id="selfie" name="selfie" accept="image/*"><br>
+                <label for="selfie">Upload an Image:</label><br>
+                <input type="file" id="selfie" name="selfie" accept="image/*" required><br>
             </div>
 
             <button type="submit" class="btn btn-success btn-block">Sign Up</button>
         </form>
     </div>
+
+    <!-- JavaScript for form validation -->
+    <script>
+        function validateForm() {
+            var selfieInput = document.getElementById("selfie").value;
+            if (!selfieInput) {
+                alert("Please upload an selfie image.");
+                return false;
+            }
+            return true;
+        }
+    </script>
 </body>
 </html>

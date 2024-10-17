@@ -4,10 +4,11 @@ api_id = 28215074
 api_hash = e8588c6943546109a766c35f02e7cea5
 interval = 15
 alert_frequency = 20
-fullness_alert_threshold = 30
+fullness_alert_threshold = 20
+depletion_alert_threshold = 100
 
 [RASPI]
-ip = 192.168.137.229
+ip = 192.168.137.121
 port_num = 5000
 
 [THINGSPEAK]

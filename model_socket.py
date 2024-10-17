@@ -55,7 +55,7 @@ def convert_minutes(total_minutes):
     return days, hours, minutes
 
 # Run a while loop until the inventory is depleted
-def predict_useuptime(current_inventory_level, model):
+def predict_useuptime(current_inventory_level, model, convertstr=True):
     time_elapsed = 0
     now = datetime.now()
     minute_of_day = now.minute + now.hour * 60
@@ -74,15 +74,18 @@ def predict_useuptime(current_inventory_level, model):
             weekday = (weekday + 1) % 7
         # Check if inventory has reached zero or below
         if current_inventory_level <= 0:
-            print(f"Inventory depleted after {time_elapsed} minutes.")
+            # print(f"Inventory depleted after {time_elapsed} minutes.")
             break
+    if convertstr:
         days, hours, minutes = convert_minutes(time_elapsed)
         str_return = f"{days} days, {hours} hours, {minutes} minutes"
-    return str_return
+        return str_return
+    else:
+        return time_elapsed
 
 def read_fullness():
     with open ('fullness.txt', 'r') as file:
-        fullness_list = []
+        fullness_list, name_list = [], []
         for line in file:
             line = line.strip()
             name, fullness = line.split()
@@ -91,7 +94,8 @@ def read_fullness():
             # Print the results (or do something with them)
             # print(f"Item: {name}, Fullness: {fullness}")
             fullness_list.append(fullness)
-    return fullness_list
+            name_list.append(name)
+    return fullness_list, name_list
 
 if __name__ == "__main__":
     # model_list = initialize_model()

@@ -184,12 +184,12 @@ def redirect_page():
         return redirect(url_for('login'))
 
 
-@app.route('/settings')
-def settings():
-    if 'username' in session:
-        return render_template('settings.html')
-    else:
-        return redirect(url_for('login'))
+# @app.route('/settings')
+# def settings():
+#     if 'username' in session:
+#         return render_template('settings.html')
+#     else:
+#         return redirect(url_for('login'))
 
 
 # Function to fetch data from a CSV file
@@ -206,7 +206,7 @@ def fetch_data():
 @app.route('/main')
 def main():
     if 'username' in session:
-        fullness_list = read_fullness()
+        fullness_list, _ = read_fullness()
         roc_list = []
         depletion_list = []
         for i in range(len(fullness_list)):
@@ -248,7 +248,12 @@ def signup():
         username = request.form['username']
         password = request.form['password']
         telephone = request.form['telephone']
-        selfie = request.files.get('selfie')  # Get the uploaded image if provided
+        selfie = request.files.get('selfie')  # Get the uploaded image
+
+        # Enforce mandatory image upload
+        if not selfie or selfie.filename == '':
+            flash('Image upload is required. Please upload an image.', 'error')
+            return redirect(url_for('signup'))
 
         # Prepare user data for registration
         user_data = {
@@ -259,9 +264,8 @@ def signup():
             'chat_id': None  # Initially no chat ID
         }
 
-        # Handle image upload (optional)
-        if selfie:
-            selfie.save(f'static/uploads/{username}.jpg')  # Save the image as username.jpg
+        # Save the uploaded image with the username
+        selfie.save(f'static/uploads/{username}.jpg')  # Save the image as username.jpg
 
         # Send a request to the Raspberry Pi server to save the user
         response = save_user(user_data)
